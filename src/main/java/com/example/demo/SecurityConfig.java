@@ -33,6 +33,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                                 new WhiteListedAllowFromStrategy(Arrays.asList("localhost"))    // 여기!
                         )
                 )
+                .frameOptions().sameOrigin()
                 .and()
                 .httpBasic();
     }

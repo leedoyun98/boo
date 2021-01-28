@@ -5,16 +5,36 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.header.writers.frameoptions.WhiteListedAllowFromStrategy;
+import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
+
+import java.util.Arrays;
 
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception { //"/users","/members"
-      http.authorizeRequests().antMatchers("/trachers","/managers")
-        .access("hasRole('ROLE.USER')")
-        .antMatchers("/","/**").access(("permitAll"))
-        .and()
-        .httpBasic();
+        http.authorizeRequests().antMatchers("/users","/members", "/console/**" )
+                .access("hasRole('ROLE.USER')")
+                .antMatchers("/","/**").access(("permitAll"))
+                .and()
+                .authorizeRequests()
+                .antMatchers(
+                        "/console/**"
+                ).permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .csrf()
+                .ignoringAntMatchers("/console/**")
+                .and()
+                .headers()
+                .addHeaderWriter(
+                        new XFrameOptionsHeaderWriter(
+                                new WhiteListedAllowFromStrategy(Arrays.asList("localhost"))    // 여기!
+                        )
+                )
+                .and()
+                .httpBasic();
     }
 
     @Override
